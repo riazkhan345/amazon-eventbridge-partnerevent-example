@@ -1,56 +1,165 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: EventBridge Lambda and MongoDB Atlas
+AWSTemplateFormatVersion: 2010-09-09
 Parameters:
-  PartnerEventSource:
-    Description: Name of Partner Event Source
+  eventrule1hr:
     Type: String
-    Default: 'aws.partner/mongodb.com/stitch.trigger/5fc72367f2fc61489a394828'
-  
-Globals:
-  Function:
-    Timeout: 3
+    Default: eventbridge_rule_1hr
+  eventrule4hr:
+    Type: String
+    Default: eventbridge_rule_4hr
+  eventrule8hr:
+    Type: String
+    Default: eventbridge_rule_8hr
+  eventrule12hr:
+    Type: String
+    Default: eventbridge_rule_12hr
 
+Metadata:
+  'AWS::CloudFormation::Designer':
+    e0b83e69-e3ad-49fc-a02e-555947be59e2:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 280
+        'y': 50
+      z: 1
+      embeds: []
+    6dbd6b1d-8781-4b65-b7ff-d1c29ebeed52:
+      size:
+        width: 80
+        height: 80
+      position:
+        x: 360
+        'y': 50
+      z: 0
+      embeds: []
+    6dc22cc5-aa2d-4f50-800a-b51b3020660b:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 480
+        'y': 40
+      z: 0
+      embeds: []
+      iscontainedinside:
+        - 6dbd6b1d-8781-4b65-b7ff-d1c29ebeed52
+    7c09d63c-c253-43e5-970e-bfcc13c64943:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 480
+        'y': 120
+      z: 0
+      embeds: []
+      iscontainedinside:
+        - 6dbd6b1d-8781-4b65-b7ff-d1c29ebeed52
+    d8152a94-fb4d-4641-9dcc-c2423be3d9b4:
+      size:
+        width: 80
+        height: 80
+      position:
+        x: 110
+        'y': 70
+      z: 0
+      embeds: []
+    339b62d9-dd17-4304-b238-f0b9bfa17a9c:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 233.70922180824513
+        'y': 134.5291537660842
+      z: 0
+      iscontainedinside:
+        - d8152a94-fb4d-4641-9dcc-c2423be3d9b4
 Resources:
-  myeventfunction:
-    Type: AWS::Serverless::Function
+  eventbridgeschedule1hr:
+    Type: AWS::Events::Rule
     Properties:
-      CodeUri: eventLambda/
-      Handler: index.handler
-      Runtime: nodejs12.x
-      FunctionName: myeventfunction
-      
-  PartnerEventBus: 
-    Type: AWS::Events::EventBus
-    Properties: 
-      EventSourceName: !Ref PartnerEventSource
-      Name: !Ref PartnerEventSource
-
-  myeventrule:
-    Type: 'AWS::Events::Rule'
-    Properties:
-      Description: Test Events Rule
-      EventBusName: !Ref PartnerEventSource
-      EventPattern: 
-        account: [!Ref AWS::AccountId]
-      Name: myeventrule
-      State: ENABLED
+      Description: "Runs every 1 hr"
+      ScheduleExpression: "rate(1 hour)"
+      State: "DISABLED"
+      Name: "eventbridge_rule_1hr"
       Targets:
-       - 
-         Arn: 
-           Fn::GetAtt:
-             - "myeventfunction"
-             - "Arn"
-         Id: "idmyeventrule"
-         
-  PermissionForEventsToInvokeLambda: 
+        -
+          Arn: "arn:aws:lambda:us-west-2:393000359662:function:pr_merge_sports_trending"
+          Input: "{'no_of_hours_to_process': 1}"
+          Id: "eventbridge1hr"
+  PermissionForEventsToInvokeLambda1hr:
     Type: AWS::Lambda::Permission
-    Properties: 
-      FunctionName: 
-        Ref: "myeventfunction"
+    Properties:
+      FunctionName: "pr_merge_sports_trending"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
-      SourceArn: 
-        Fn::GetAtt: 
-          - "myeventrule"
-          - "Arn"         
+      SourceArn:
+        Fn::GetAtt:
+          - "eventbridgeschedule1hr"
+          - "Arn"
+  eventbridgeschedule4hr:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Runs every 4 hrs"
+      ScheduleExpression: "rate(4 hours)"
+      State: "DISABLED"
+      Name: "eventbridge_rule_4hr"
+      Targets:
+        -
+          Arn: "arn:aws:lambda:us-west-2:393000359662:function:pr_merge_sports_trending"
+          Input: "{'no_of_hours_to_process': 4}"
+          Id: "eventbridge4hr"
+  PermissionForEventsToInvokeLambda4hr:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: "pr_merge_sports_trending"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "eventbridgeschedule4hr"
+          - "Arn"
+  eventbridgeschedule8hr:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Runs every 8 hrs"
+      ScheduleExpression: "rate(8 hours)"
+      State: "DISABLED"
+      Name: "eventbridge_rule_8hr"
+      Targets:
+        -
+          Arn: "arn:aws:lambda:us-west-2:393000359662:function:pr_merge_sports_trending"
+          Input: "{'no_of_hours_to_process': 8}"
+          Id: "eventbridge8hr"
+  PermissionForEventsToInvokeLambda8hr:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: "pr_merge_sports_trending"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "eventbridgeschedule8hr"
+          - "Arn"
+  eventbridgeschedule12hr:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Runs every 12 hrs"
+      ScheduleExpression: "rate(12 hours)"
+      State: "DISABLED"
+      Name: "eventbridge_rule_12hr"
+      Targets:
+        -
+          Arn: "arn:aws:lambda:us-west-2:393000359662:function:pr_merge_sports_trending"
+          Input: "{'no_of_hours_to_process': 12}"
+          Id: "eventbridge12hr"
+  PermissionForEventsToInvokeLambda12hr:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: "pr_merge_sports_trending"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "eventbridgeschedule12hr"
+          - "Arn"
